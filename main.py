@@ -1,3 +1,4 @@
+#import library
 import pandas as pd
 import os
 
@@ -13,7 +14,7 @@ from keras.models import load_model
 
 from Cleansing import clean
 
-
+#Flask
 app = Flask(__name__)
 
 app.json_encoder = LazyJSONEncoder
@@ -44,20 +45,22 @@ swagger = Swagger(app,template = swagger_template, config = swagger_config)
 #Route Home Page
 @app.route('/')
 def hello():
-    return """<h1>Home Page API for Sentiment Prediction based on Machine Learning Nural Network</h1>
-    <p>Silakan untuk masuk ke fitur API bisa dengan  
+    return """<h1>Home Page API for Sentiment Prediction based on Machine Learning Neural Network (NN) dan Long Short Term Memory(LSTM)</h1>
+    <p>Silakan untuk masuk ke fitur API sentiment prediction dengan   
     <a href = 'http://127.0.0.1:5000/docs'>klik disini</a> </p>"""
 
 #API Text Processing Neural Network
 @swag_from("docs/text_nn.yml", methods=['POST'])
-@app.route('/text-Processing', methods=['POST'])
+@app.route('/text-nn', methods=['POST'])
 def text_processing():
     textinput = request.form.get('text')
     textoutput = clean(textinput)
+    sentimentoutput = clean(textoutput)
      
     json_respon = {
         'input' : textinput,
-        'output' : textoutput,
+        'output text' : textoutput,
+        'output sentiment' : sentimentoutput,
     }
     response_data = jsonify(json_respon)
     return response_data
