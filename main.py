@@ -49,7 +49,7 @@ def hello():
     <a href = 'http://127.0.0.1:5000/docs'>klik disini</a> </p>"""
 
 #API Text Processing Neural Network
-@swag_from("docs/text_neuralnetwork.yml", methods=['POST'])
+@swag_from("docs/text_nn.yml", methods=['POST'])
 @app.route('/text-Processing', methods=['POST'])
 def text_processing():
     textinput = request.form.get('text')
