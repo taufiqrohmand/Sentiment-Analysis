@@ -15,7 +15,7 @@ from keras.models import load_model
 from Cleansing import clean
 
 #Flask
-app = Flask(__name__)
+app = Flask(__name__, static_folder='docs', static_url_path='')
 
 app.json_encoder = LazyJSONEncoder
 
@@ -46,11 +46,9 @@ swagger = Swagger(app,template = swagger_template, config = swagger_config)
 
 #Route Home Page
 @app.route('/')
-def hello():
-    return """<h1>Home Page API for Sentiment Prediction based
-      Neural Network (NN) dan Long Short Term Memory(LSTM)</h1>
-    <p>Silakan untuk masuk ke fitur API sentiment prediction dengan   
-    <a href = 'http://127.0.0.1:5000/docs'>klik disini</a> </p>"""
+def home():
+    return app.send_static_file('home.html')
+
 
 
 #API Text Processing Neural Network
@@ -88,4 +86,4 @@ def text_lstm():
 
 
 if __name__ == '__main__' :
-    app.run(debug=True)
+    app.run(debug=True, threaded=True, port=5000)
