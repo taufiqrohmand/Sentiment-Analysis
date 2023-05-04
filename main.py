@@ -18,6 +18,8 @@ from Cleansing import clean
 app = Flask(__name__)
 
 app.json_encoder = LazyJSONEncoder
+
+#Swagger
 swagger_template = dict(
     info = {
     'title': LazyString(lambda:'Challenge Platinum API Documentation and Modelling Machine Learning'),
@@ -45,14 +47,33 @@ swagger = Swagger(app,template = swagger_template, config = swagger_config)
 #Route Home Page
 @app.route('/')
 def hello():
-    return """<h1>Home Page API for Sentiment Prediction based on Machine Learning Neural Network (NN) dan Long Short Term Memory(LSTM)</h1>
+    return """<h1>Home Page API for Sentiment Prediction based
+      Neural Network (NN) dan Long Short Term Memory(LSTM)</h1>
     <p>Silakan untuk masuk ke fitur API sentiment prediction dengan   
     <a href = 'http://127.0.0.1:5000/docs'>klik disini</a> </p>"""
+
 
 #API Text Processing Neural Network
 @swag_from("docs/text_nn.yml", methods=['POST'])
 @app.route('/text-nn', methods=['POST'])
-def text_processing():
+def text_nn():
+    textinput = request.form.get('text')
+    textoutput = clean(textinput)
+    sentimentoutput = clean(textoutput)
+     
+    json_respon = {
+        'input' : textinput,
+        'output text' : textoutput,
+        'output sentiment' : sentimentoutput,
+    }
+    response_data = jsonify(json_respon)
+    return response_data
+
+
+#API Text Processing Long Short Term Memory
+@swag_from("docs/text_lstm.yml", methods=['POST'])
+@app.route('/text-lstm', methods=['POST'])
+def text_lstm():
     textinput = request.form.get('text')
     textoutput = clean(textinput)
     sentimentoutput = clean(textoutput)

@@ -1,7 +1,7 @@
 tags:
-    - name: Text Processing Neural Network
+    - name: Text Processing Long Short Term Memory
 get:
-  description: Text for processing NN
+  description: Text for processing LSTM
 parameters:
   - name: text
     in: formData
