@@ -54,7 +54,7 @@ def remove_abusive(text):
     
 #Remove stopword
 def remove_stopwords(text):
-    df_stopwords = pd.read_csv('dataset/stopwords_id.txt', sep=" " ,names=['nirmakna'])
+    df_stopwords = pd.read_csv('dataset/stopwords-id.txt', sep=" " ,names=['nirmakna'])
     list_stopwords = df_stopwords['nirmakna'].to_list()
     text = text.split(" ") 
     text = [i for i in text if i not in list_stopwords] 
