@@ -22,7 +22,7 @@ app.json_encoder = LazyJSONEncoder
 #Swagger
 swagger_template = dict(
     info = {
-    'title': LazyString(lambda:'Challenge Platinum API Documentation and Modelling Machine Learning'),
+    'title': LazyString(lambda:'Sentiment Prediction Analysis for Tweet'),
     'version' : LazyString(lambda: '2.0.0'),
     'description' : LazyString(lambda: 'Data Documentation API for Sentiment Prediction Machine Learning'),
     },
