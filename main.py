@@ -85,5 +85,19 @@ def text_lstm():
     return response_data
 
 
+#Allow Access File
+allow_extension = set(['csv'])
+def allowed_file(filename):
+    return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+
+
+#Api file prediction NN
+@swag_from('docs/file_nn.yml', methods = ['POST'])
+@app.route('/file_nn', methods = ['POST'])
+
+
+
 if __name__ == '__main__' :
     app.run(debug=True, threaded=True, port=5000)
