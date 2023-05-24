@@ -86,16 +86,40 @@ def text_lstm():
 
 
 #Allow Access File
-allow_extension = set(['csv'])
+allowed_extensions = set(['csv'])
 def allowed_file(filename):
     return '.' in filename and \
-            filename.rsplit('.', 1)[1].lower() in allowed_extensions
+        filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 
 
 #Api file prediction NN
 @swag_from('docs/file_nn.yml', methods = ['POST'])
 @app.route('/file_nn', methods = ['POST'])
+def file_nn():
+    file = request.files['file']
+
+    if file and allowed_file(file.filename):
+        #Rename file with original name + date time process
+        filename = secure_filename(file.filename)
+        time_stamp = (datetime.now().strftime('%d-%m-%Y_%H%M%S'))
+        new_filename = f'{filename.split(".")[0]}_{time_stamp}.csv'
+        
+        #save file input to INPUT folder on local
+        save_location = os.path.join('input', new_filename)
+        file.save(save_location)
+        filepath = 'input/' + str(new_filename)
+
+        #Load data file input
+        data = pd.read_csv(filepath, encoding='latin-1')
+        first_column_pre_process = data.iloc[:, 0]
+
+        #empety array
+        cleaned_file = []
+
+        for text in first_column_pre_process:
+            file_clean = cleansing(text)
+
 
 
 
