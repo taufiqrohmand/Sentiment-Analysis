@@ -94,8 +94,8 @@ def allowed_file(filename):
 
 
 #Api file prediction NN
-@swag_from('docs/file_nn.yml', methods = ['POST'])
-@app.route('/file_nn', methods = ['POST'])
+@swag_from('docs/file_lstm.yml', methods = ['POST'])
+@app.route('/file_lstm', methods = ['POST'])
 def file_nn():
     file = request.files['file']
 
