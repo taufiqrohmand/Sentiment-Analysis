@@ -22,7 +22,7 @@ app.json_encoder = LazyJSONEncoder
 #Swagger
 swagger_template = dict(
     info = {
-    'title': LazyString(lambda:'Sentiment Prediction Analysis for Tweet'),
+    'title': LazyString(lambda:'Sentiment Prediction Analysis'),
     'version' : LazyString(lambda: '2.0.0'),
     'description' : LazyString(lambda: 'Data Documentation API for Sentiment Prediction Machine Learning'),
     },
@@ -93,10 +93,10 @@ def allowed_file(filename):
 
 
 
-#Api file prediction NN
+#Api file prediction LSTM
 @swag_from('docs/file_lstm.yml', methods = ['POST'])
-@app.route('/file_lstm', methods = ['POST'])
-def file_nn():
+@app.route('/file_lstm', methods=['POST'])
+def file_lstm():
     file = request.files['file']
 
     if file and allowed_file(file.filename):
@@ -118,7 +118,7 @@ def file_nn():
         cleaned_file = []
 
         for text in first_column_pre_process:
-            file_clean = cleansing(text)
+            file_clean = clean(text)
 
 
 
