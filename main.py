@@ -76,11 +76,12 @@ def text_lstm():
     textoutput = clean(textinput)
     sentimentoutput = clean(textoutput)
      
-    json_respon = {
+    json_respon = { 
         'input' : textinput,
         'output text' : textoutput,
         'output sentiment' : sentimentoutput,
     }
+    
     response_data = jsonify(json_respon)
     return response_data
 
@@ -119,6 +120,17 @@ def file_lstm():
 
         for text in first_column_pre_process:
             file_clean = clean(text)
+
+
+    json_response = {
+        'input' : textinput,
+        'output text' : textoutput,
+        'output sentiment' : sentimentoutput,
+    }
+        
+
+    response_data = jsonify(json_response)
+    return response_data
 
 
 

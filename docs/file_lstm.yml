@@ -1,12 +1,13 @@
 tags:
-    - name: File Processing Long Short Term Memory CSV
-get:
-  description: File for processing LSTM CSV
+  - name: File LSTM
+consumes:
+  - multipart/form-data 
 parameters:
   - name: file
     in: formData
     required: true
-    type: string
+    type: file
+    description: Upload your CSV File
 responses:
   '200':
     description: Successful response
@@ -14,3 +15,4 @@ responses:
      description: Bad request
   '500':
     description: Internal server error
+ 
