@@ -1,6 +1,8 @@
 #import library
 import pandas as pd
 import os
+import json
+import pickle
 
 from flask import Flask, jsonify, send_from_directory, make_response, request
 from flasgger import Swagger, LazyString, LazyJSONEncoder, swag_from
@@ -49,21 +51,45 @@ swagger = Swagger(app,template = swagger_template, config = swagger_config)
 def home():
     return app.send_static_file('home.html')
 
+#Load Feature
+file = open('asset/feature/feature_nn.pickle', 'rb')
+feature_nn = pickle.load(file)
+file.close()
 
+#Load Model NN
+file = open('asset/model/model_nn.pickle', 'rb')
+model_nn = pickle.load(file)
+file.close
+
+def sentiment_nn(textinput):
+        text = feature_nn.transform([clean(textinput)])
+        result = model_nn.predict(text)[0]
+        return result
+
+def sentiment_nnfile(textinput):
+            text = feature_nn.transform([clean(textinput)])
+            result = model_nn.predict(text)[0]
+            return str (result)
 
 #API Text Processing Neural Network
 @swag_from("docs/text_nn.yml", methods=['POST'])
 @app.route('/text-nn', methods=['POST'])
 def text_nn():
+
     textinput = request.form.get('text')
     textoutput = clean(textinput)
-    sentimentoutput = clean(textoutput)
+    sentimentoutput = sentiment_nn(textinput)
      
     json_respon = {
-        'input' : textinput,
-        'output text' : textoutput,
-        'output sentiment' : sentimentoutput,
+        'status_code': 200,
+        'description': "Result Sentiment Neural Network",
+        'data': {
+            'Input' : textinput,
+            'Output text' : textoutput,
+            'Result sentiment' : sentimentoutput
+        },
     }
+        
     response_data = jsonify(json_respon)
     return response_data
 
@@ -90,14 +116,14 @@ def text_lstm():
 allowed_extensions = set(['csv'])
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in allowed_extensions
+        filename.rsplit('.', 1)[0].lower() in allowed_extensions
 
 
 
-#Api file prediction LSTM
-@swag_from('docs/file_lstm.yml', methods = ['POST'])
-@app.route('/file_lstm', methods=['POST'])
-def file_lstm():
+#Api file prediction NN
+@swag_from('docs/file_nn.yml', methods = ['POST'])
+@app.route('/file_nn', methods=['POST'])
+def file_nn():
     file = request.files['file']
 
     if file and allowed_file(file.filename):
@@ -114,22 +140,38 @@ def file_lstm():
         #Load data file input
         data = pd.read_csv(filepath, encoding='latin-1')
         first_column_pre_process = data.iloc[:, 0]
-
+    
         #empety array
-        cleaned_file = []
+        input_clean = []
+        sentiment_file = []
 
         for text in first_column_pre_process:
             file_clean = clean(text)
+            file_sentiment = sentiment_nnfile(first_column_pre_process)
 
+            input_clean.append(file_clean)
+            sentiment_file.append(file_sentiment)
 
-    json_response = {
-        'input' : textinput,
-        'output text' : textoutput,
-        'output sentiment' : sentimentoutput,
-    }
+        new_df = pd.DataFrame(
+            {'Input': first_column_pre_process,
+             'Output': input_clean,
+             'Result': sentiment_file,
+             })
         
+        outputfilepath = f'output/{new_filename}'
+        new_df.to_csv(outputfilepath)
 
-    response_data = jsonify(json_response)
+        result = new_df.to_json(orient="index")
+        jresult = json.loads(result)
+        json.dumps(jresult) 
+
+    json_respon = {
+        'status_code': 200,
+        'description': "Result File Sentiment Neural Network",
+        'result': jresult
+        }
+        
+    response_data = jsonify(json_respon)
     return response_data
 
 
