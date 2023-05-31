@@ -1,5 +1,6 @@
 #import library
 import pandas as pd
+import numpy as np
 import os
 import json
 import pickle
@@ -51,7 +52,7 @@ swagger = Swagger(app,template = swagger_template, config = swagger_config)
 def home():
     return app.send_static_file('home.html')
 
-#Load Feature
+#Load Feature NN
 file = open('asset/feature/feature_nn.pickle', 'rb')
 feature_nn = pickle.load(file)
 file.close()
@@ -59,17 +60,37 @@ file.close()
 #Load Model NN
 file = open('asset/model/model_nn.pickle', 'rb')
 model_nn = pickle.load(file)
-file.close
+file.close()
+
+
+#Load Tokenizer
+file = open('asset/feature/tokenizer.pickle', 'rb')
+load_token = pickle.load(file)
+file.close()
+sentiment = ['negative', 'neutral', 'positive']
+
+
+#Load Feature LSTM
+file = open('asset/feature/x_pad_sequences.pickle', 'rb')
+feature_lstm = pickle.load(file)
+file.close()
+
+
+#load Model LSTM
+model_lstm = load_model('asset/model/model_lstm.h5')
+
 
 def sentiment_nn(textinput):
-        text = feature_nn.transform([clean(textinput)])
-        result = model_nn.predict(text)[0]
-        return result
+    text = feature_nn.transform([clean(textinput)])
+    result = model_nn.predict(text)[0]
+    return result
 
 def sentiment_nnfile(textinput):
-            text = feature_nn.transform([clean(textinput)])
-            result = model_nn.predict(text)[0]
-            return str (result)
+    text = feature_nn.transform([clean(textinput)])
+    result = model_nn.predict(text)[0]
+    return str (result)
+
+
 
 #API Text Processing Neural Network
 @swag_from("docs/text_nn.yml", methods=['POST'])
@@ -100,12 +121,22 @@ def text_nn():
 def text_lstm():
     textinput = request.form.get('text')
     textoutput = clean(textinput)
-    sentimentoutput = clean(textoutput)
+    
+    feature = load_token.texts_to_sequences(textoutput)
+    feature = pad_sequences(feature, maxlen=feature_lstm.shape[1])
+
+    pred_lstm = model_lstm.predict(feature)
+
+    sentimentoutput = sentiment[np.argmax(pred_lstm[0])]
      
-    json_respon = { 
-        'input' : textinput,
-        'output text' : textoutput,
-        'output sentiment' : sentimentoutput,
+    json_respon = {
+        'status_code': 200,
+        'description': "Result Sentiment Neural Network",
+        'data': {
+            'Input' : textinput,
+            'Output text' : textoutput,
+            'Result sentiment' : sentimentoutput
+        },
     }
     
     response_data = jsonify(json_respon)
@@ -174,6 +205,31 @@ def file_nn():
     response_data = jsonify(json_respon)
     return response_data
 
+
+
+# Error Handling
+@app.errorhandler(400)
+def handle_400_error(_error):
+    "Return a http 400 error to client"
+    return make_response(jsonify({'error': 'Misunderstood'}), 400)
+
+
+@app.errorhandler(401)
+def handle_401_error(_error):
+    "Return a http 401 error to client"
+    return make_response(jsonify({'error': 'Unauthorised'}), 401)
+
+
+@app.errorhandler(404)
+def handle_404_error(_error):
+    "Return a http 404 error to client"
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+@app.errorhandler(500)
+def handle_500_error(_error):
+    "Return a http 500 error to client"
+    return make_response(jsonify({'error': 'Server error'}), 500)
 
 
 
