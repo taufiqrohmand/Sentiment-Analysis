@@ -192,14 +192,12 @@ def file_nn():
         outputfilepath = f'output/{new_filename}'
         new_df.to_csv(outputfilepath)
 
-        result = new_df.to_json(orient="index")
-        jresult = json.loads(result)
-        json.dumps(jresult) 
+     
 
     json_respon = {
         'status_code': 200,
         'description': "Result File Sentiment Neural Network",
-        'result': jresult
+        'result': 
         }
         
     response_data = jsonify(json_respon)
