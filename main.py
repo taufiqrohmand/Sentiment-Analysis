@@ -63,20 +63,18 @@ model_nn = pickle.load(file)
 file.close()
 
 
-#Load Tokenizer
-file = open('asset/feature/tokenizer.pickle', 'rb')
-load_token = pickle.load(file)
-file.close()
+def load_pickle(file_path):
+    with open(file_path, 'rb') as file:
+        return pickle.load(file)
+
+# Load Tokenizer
+load_token = load_pickle('asset/feature/tokenizer.pickle')
 sentiment = ['negative', 'neutral', 'positive']
 
+# Load Feature LSTM
+feature_lstm = load_pickle('asset/feature/x_pad_sequences.pickle')
 
-#Load Feature LSTM
-file = open('asset/feature/x_pad_sequences.pickle', 'rb')
-feature_lstm = pickle.load(file)
-file.close()
-
-
-#load Model LSTM
+# Load Model LSTM
 model_lstm = load_model('asset/model/model_lstm.h5')
 
 
@@ -123,15 +121,15 @@ def text_lstm():
     textoutput = clean(textinput)
     
     feature = load_token.texts_to_sequences(textoutput)
-    feature = pad_sequences(feature, maxlen=feature_lstm.shape[1])
+    features = pad_sequences(feature, maxlen=feature_lstm.shape[1])
 
-    pred_lstm = model_lstm.predict(feature)
+    pred_lstm = model_lstm.predict(features)
 
     sentimentoutput = sentiment[np.argmax(pred_lstm[0])]
      
     json_respon = {
         'status_code': 200,
-        'description': "Result Sentiment Neural Network",
+        'description': "Result Sentiment Long-short Term Memory",
         'data': {
             'Input' : textinput,
             'Output text' : textoutput,
