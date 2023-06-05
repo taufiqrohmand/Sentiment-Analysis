@@ -145,10 +145,10 @@ def text_lstm():
 
 #Allow Access File
 allowed_extensions = set(['csv'])
+
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[0].lower() in allowed_extensions
-
+        filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 
 #Api file prediction NN
@@ -156,12 +156,13 @@ def allowed_file(filename):
 @app.route('/file_nn', methods=['POST'])
 def file_nn():
     file = request.files['file']
+    new_df = pd.DataFrame()
 
     if file and allowed_file(file.filename):
         #Rename file with original name + date time process
         filename = secure_filename(file.filename)
         time_stamp = (datetime.now().strftime('%d-%m-%Y_%H%M%S'))
-        new_filename = f'{filename.split(".")[0]}_{time_stamp}.csv'
+        new_filename = f'{filename.split(".")[0]}_{time_stamp}_PredictNN.csv'
         
         #save file input to INPUT folder on local
         save_location = os.path.join('input', new_filename)
@@ -172,16 +173,9 @@ def file_nn():
         data = pd.read_csv(filepath, encoding='latin-1')
         first_column_pre_process = data.iloc[:, 0]
     
-        #empety array
-        input_clean = []
-        sentiment_file = []
-
-        for text in first_column_pre_process:
-            file_clean = clean(text)
-            file_sentiment = sentiment_nnfile(first_column_pre_process)
-
-            input_clean.append(file_clean)
-            sentiment_file.append(file_sentiment)
+        #clean and prediction
+        input_clean = first_column_pre_process.apply(clean)
+        sentiment_file = first_column_pre_process.apply(sentiment_nnfile)
 
         new_df = pd.DataFrame(
             {'Input': first_column_pre_process,
@@ -192,12 +186,14 @@ def file_nn():
         outputfilepath = f'output/{new_filename}'
         new_df.to_csv(outputfilepath)
 
-     
+    # Convert the DataFrame to a list of dictionaries
+    data = new_df.to_dict(orient='records')
 
     json_respon = {
         'status_code': 200,
         'description': "Result File Sentiment Neural Network",
-        }
+        'data': data
+    }
         
     response_data = jsonify(json_respon)
     return response_data
@@ -207,12 +203,13 @@ def file_nn():
 @app.route('/file_lstm', methods=['POST'])
 def file_lstm():
     file = request.files['file']
+    new_df = pd.DataFrame()
 
     if file and allowed_file(file.filename):
         #Rename file with original name + date time process
         filename = secure_filename(file.filename)
         time_stamp = (datetime.now().strftime('%d-%m-%Y_%H%M%S'))
-        new_filename = f'{filename.split(".")[0]}_{time_stamp}.csv'
+        new_filename = f'{filename.split(".")[0]}_{time_stamp}_PredictLSTM.csv'
         
         #save file input to INPUT folder on local
         save_location = os.path.join('input', new_filename)
@@ -223,16 +220,16 @@ def file_lstm():
         data = pd.read_csv(filepath, encoding='latin-1')
         first_column_pre_process = data.iloc[:, 0]
     
-        #empety array
-        input_clean = []
-        sentiment_file = []
+        # Cleansing
+        input_clean = first_column_pre_process.apply(clean)
 
-        for text in first_column_pre_process:
-            file_clean = clean(text)
-            file_sentiment = sentiment_nnfile(first_column_pre_process)
+        # Feature Extraxtion
+        features = load_token.texts_to_sequences(input_clean)
+        features = pad_sequences(features, maxlen=feature_lstm.shape[1])
 
-            input_clean.append(file_clean)
-            sentiment_file.append(file_sentiment)
+        # Predict
+        pred_lstm = model_lstm.predict(features)
+        sentiment_file = [sentiment[np.argmax(pred)] for pred in pred_lstm]
 
         new_df = pd.DataFrame(
             {'Input': first_column_pre_process,
@@ -243,12 +240,14 @@ def file_lstm():
         outputfilepath = f'output/{new_filename}'
         new_df.to_csv(outputfilepath)
 
-     
+    # Convert the new_df DataFrame to a list of dictionaries
+    data = new_df.to_dict(orient='records')
 
     json_respon = {
         'status_code': 200,
-        'description': "Result File Sentiment Neural Network",
-        }
+        'description': "Result File Sentiment LSTM",
+        'data': data
+    }
         
     response_data = jsonify(json_respon)
     return response_data

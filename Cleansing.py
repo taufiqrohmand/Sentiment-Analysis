@@ -1,10 +1,16 @@
-#import module
 import re
 import pandas as pd
-import emoji
-
 from unidecode import unidecode
 
+# Read the CSV files
+df_alay = pd.read_csv("dataset/new_kamusalay.csv", names=['alay', 'normal'], encoding='latin-1')
+dict_alay = dict(zip(df_alay['alay'], df_alay['normal']))
+
+df_abusive = pd.read_csv('dataset/abusive.csv', names=['label'], encoding='latin-1')
+set_abusive = set(df_abusive['label'].to_list())
+
+df_stopwords = pd.read_csv('dataset/stopwords-id.txt', sep=" " ,names=['nirmakna'])
+set_stopwords = set(df_stopwords['nirmakna'].to_list())
 
 #Function clean
 def clean_text(text):
@@ -32,35 +38,25 @@ def clean_text(text):
     text = text.strip()
     return text
 
-
 #Function Change Alay to Normal
 def change_alay(text):
-    df_alay = pd.read_csv("dataset/new_kamusalay.csv", names=['alay', 'normal'], encoding='latin-1')
-    dict_alay = dict(zip(df_alay['alay'], df_alay['normal'])) 
     for word in dict_alay:
         change_word = ' '.join([dict_alay[word] if word in dict_alay else word for word in text.split(' ')])
         return change_word
 
-
 #Function remove abusive
 def remove_abusive(text):
-    df_abusive = pd.read_csv('dataset/abusive.csv', names=['label'], encoding='latin-1')
-    list_abusive = df_abusive['label'].to_list()
-    text = text.split(" ") 
-    text = [i for i in text if i not in list_abusive] 
-    text = ' '.join(text) 
+    text = text.split(" ")
+    text = [i for i in text if i not in set_abusive]
+    text = ' '.join(text)
     return text
 
-    
 #Remove stopword
 def remove_stopwords(text):
-    df_stopwords = pd.read_csv('dataset/stopwords-id.txt', sep=" " ,names=['nirmakna'])
-    list_stopwords = df_stopwords['nirmakna'].to_list()
-    text = text.split(" ") 
-    text = [i for i in text if i not in list_stopwords] 
-    text = ' '.join(text) 
+    text = text.split(" ")
+    text = [i for i in text if i not in set_stopwords]
+    text = ' '.join(text)
     return text
-
 
 #Function Cleansing
 def clean(text):

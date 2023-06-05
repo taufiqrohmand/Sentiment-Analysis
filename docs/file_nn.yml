@@ -1,18 +1,36 @@
 tags:
-  - name: File NN
+  - File Sentiment Analysis NN
 consumes:
-  - multipart/form-data 
+  - multipart/form-data
 parameters:
-  - name: file
-    in: formData
-    required: true
+  - in: formData
+    name: file
     type: file
-    description: Upload your CSV File
+    required: true
+    description: The file to be analyzed.
 responses:
-  '200':
-    description: Successful response
-  '400':
-     description: Bad request
-  '500':
-    description: Internal server error
- 
+  200:
+    description: Result File Sentiment Neural Network
+    schema:
+      type: object
+      properties:
+        status_code:
+          type: integer
+          description: The HTTP status code.
+        description:
+          type: string
+          description: A description of the response.
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              Input:
+                type: string
+                description: The original input text.
+              Output:
+                type: string
+                description: The cleaned input text.
+              Result:
+                type: string
+                description: The sentiment analysis result.
